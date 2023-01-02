@@ -40,6 +40,7 @@
 #include <X11/Xlib.h>
 #include <X11/Intrinsic.h>
 #include <X11/Shell.h>
+#include <X11/Xft/Xft.h>
 
 #define EXIT_STATUS_ACCEPT	0
 #define EXIT_STATUS_CANCEL	1
@@ -76,17 +77,16 @@ typedef struct TextObjectStruct
 {
    char *text;
    int textLength;
-   int direction;
    int ascent;
    int descent;
-   XCharStruct overall;
+   int width;
    struct TextObjectStruct *next;
 } TextObject;
 
 typedef struct
 {
    char *fullText;
-   XFontStruct *font;
+   XftFont *font;
    TextObject *multiText;
    WidgetInfo w;
 } LabelInfo;
@@ -202,9 +202,9 @@ typedef struct
 
 void outOfMemory(AppInfo *app, int line);
 void freeIf(void *p);
-void freeFontIf(AppInfo *app, XFontStruct *f);
+void freeFontIf(AppInfo *app, XftFont *f);
 
-XFontStruct *getFontResource(AppInfo *app, char *instanceName, char *className);
+XftFont *getFontResource(AppInfo *app, char *instanceName, char *className);
 char *getStringResourceWithDefault(char *instanceName, char *className,
 				   char *defaultText);
 unsigned int getUnsignedIntegerResource(AppInfo *app, char *instanceName,
@@ -213,9 +213,9 @@ unsigned int getUnsignedIntegerResource(AppInfo *app, char *instanceName,
 long getResolutionResource(AppInfo *app, char *instanceName, char *className,
 			   char *defaultResolutionSpec);
 
-void calcLabelTextExtents(LabelInfo *label);
+void calcLabelTextExtents(AppInfo *app, LabelInfo *label);
 void calcTotalButtonExtents(ButtonInfo *button);
-void calcButtonExtents(ButtonInfo *button);
+void calcButtonExtents(AppInfo *app, ButtonInfo *button);
 void balanceButtonExtents(ButtonInfo *button1, ButtonInfo *button2);
 void calcButtonLabelPosition(ButtonInfo *button);
 

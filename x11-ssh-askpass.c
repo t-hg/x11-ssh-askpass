@@ -55,6 +55,7 @@
 #include <X11/Intrinsic.h>
 #include <X11/Shell.h>
 #include <X11/Xos.h>
+#include <X11/Xft/Xft.h>
 #include "dynlist.h"
 #include "drawing.h"
 #include "resources.h"
@@ -83,22 +84,27 @@ void freeIf(void *p)
    }
 }
 
-void freeFontIf(AppInfo *app, XFontStruct *f)
+void freeFontIf(AppInfo *app, XftFont *f)
 {
    if (f) {
-      XFreeFont(app->dpy, f);
+      XftFontClose(app->dpy, f);
    }
 }
 
-XFontStruct *getFontResource(AppInfo *app, char *instanceName, char *className)
+XftFont *getFontResource(AppInfo *app, char *instanceName, char *className)
 {
-   char *fallbackFont = "fixed";
-   
-   XFontStruct *f = NULL;
+   char *fallbackFont = "monospace:size=12";
    char *s = get_string_resource(instanceName, className);
-   f = XLoadQueryFont(app->dpy, (s ? s : fallbackFont));
+   XftFont *f = NULL;
+   if (!(f = XftFontOpenName(app->dpy, DefaultScreen(app->dpy), s))) {
+      fprintf(stderr, "error, cannot load font from name: '%s'\n", s);
+      return NULL;
+   }
    if (!f) {
-      f = XLoadQueryFont(app->dpy, fallbackFont);
+      if (!(f = XftFontOpenName(app->dpy, DefaultScreen(app->dpy), fallbackFont))) {
+         fprintf(stderr, "error, cannot load font from name: '%s'\n", fallbackFont);
+         return NULL;
+      }
    }
    if (s) {
       free(s);
@@ -214,16 +220,21 @@ long getResolutionResource(AppInfo *app, char *instanceName, char *className,
 }
 #undef DefaultResolution
 
-void calcTextObjectExtents(TextObject *t, XFontStruct *font) {
-   if ((!t) || (!(t->text))) {
-      return;
+void calcTextObjectExtents(AppInfo *app, TextObject *t, XftFont *font) {
+   XGlyphInfo ext;
+
+   if (!font || !t || !(t->text)) {
+		return;
    }
+
    t->textLength = strlen(t->text);
-   XTextExtents(font, t->text, t->textLength, &(t->direction),
-		&(t->ascent), &(t->descent), &(t->overall));
+   XftTextExtentsUtf8(app->dpy, font, (XftChar8 *)t->text, t->textLength, &ext);
+   t->ascent = font->ascent;
+   t->descent = font->descent;
+   t->width = ext.width;
 }
 
-void calcLabelTextExtents(LabelInfo *label)
+void calcLabelTextExtents(AppInfo *app, LabelInfo *label)
 {
    TextObject *t;
    
@@ -232,10 +243,10 @@ void calcLabelTextExtents(LabelInfo *label)
    }
    t = label->multiText;
    while (NULL != t) {
-      calcTextObjectExtents(t, label->font);
+      calcTextObjectExtents(app, t, label->font);
       label->w.height += (t->ascent + t->descent);
-      if (label->w.width < t->overall.width) {
-	 label->w.width = t->overall.width;
+      if (label->w.width < t->width) {
+	 label->w.width = t->width;
       }
       t = t->next;
    }
@@ -254,12 +265,12 @@ void calcTotalButtonExtents(ButtonInfo *button)
    button->w3.w.height += (2 * button->w3.borderWidth);
 }
 
-void calcButtonExtents(ButtonInfo *button)
+void calcButtonExtents(AppInfo *app, ButtonInfo *button)
 {
    if (!button) {
       return;
    }
-   calcLabelTextExtents(&(button->label));
+   calcLabelTextExtents(app, &(button->label));
    button->w3.interiorWidth = (button->label.w.width +
 			       (2 * button->w3.horizontalSpacing));
    button->w3.interiorHeight = (button->label.w.height +
@@ -436,7 +447,7 @@ void createDialog(AppInfo *app)
    createLabel(app, labelText, &(d->label));
    freeIf(labelText);
    d->label.font = getFontResource(app, "dialog.font", "Dialog.Font");
-   calcLabelTextExtents(&(d->label));
+   calcLabelTextExtents(app, &(d->label));
    d->label.w.foreground = d->w3.w.foreground;
    d->label.w.background = d->w3.w.background;
    
@@ -471,7 +482,7 @@ void createDialog(AppInfo *app)
    freeIf(labelText);
    d->okButton.label.font =
       getFontResource(app, "okButton.font", "Button.Font");
-   calcButtonExtents(&(d->okButton));
+   calcButtonExtents(app, &(d->okButton));
    d->okButton.label.w.foreground = d->okButton.w3.w.foreground;
    d->okButton.label.w.background = d->okButton.w3.w.background;
    
@@ -511,7 +522,7 @@ void createDialog(AppInfo *app)
    freeIf(labelText);
    d->cancelButton.label.font =
       getFontResource(app, "cancelButton.font", "Button.Font");
-   calcButtonExtents(&(d->cancelButton));
+   calcButtonExtents(app, &(d->cancelButton));
    d->cancelButton.label.w.foreground = d->cancelButton.w3.w.foreground;
    d->cancelButton.label.w.background = d->cancelButton.w3.w.background;
 
@@ -835,8 +846,9 @@ void createGCs(AppInfo *app)
    gcvMask |= GCForeground;
    gcv.background = d->label.w.background;
    gcvMask |= GCBackground;
-   gcv.font = d->label.font->fid;
-   gcvMask |= GCFont;
+   //TODO
+   //gcv.font = d->label.font->fid;
+   //gcvMask |= GCFont;
    app->textGC = XCreateGC(app->dpy, app->rootWindow, gcvMask, &gcv);
    
    gcvMask = 0;
@@ -874,7 +886,6 @@ void paintLabel(AppInfo *app, Drawable draw, LabelInfo label)
    }
    XSetForeground(app->dpy, app->textGC, label.w.foreground);
    XSetBackground(app->dpy, app->textGC, label.w.background);
-   XSetFont(app->dpy, app->textGC, label.font->fid);
    
    t = label.multiText;
    x = label.w.x;
