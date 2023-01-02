@@ -67,10 +67,7 @@ char *progname = NULL;
 char *progclass = NULL;
 XrmDatabase db = 0;
 
-static char *defaults[] = {
-#include "SshAskpass_ad.h"
-   0
-};
+static char *defaults[] = {};
 
 void outOfMemory(AppInfo *app, int line)
 {
