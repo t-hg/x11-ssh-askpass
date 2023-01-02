@@ -880,25 +880,31 @@ void paintLabel(AppInfo *app, Drawable draw, LabelInfo label)
    TextObject *t;
    Position x;
    Position y;
-
    if (!(label.fullText)) {
       return;
    }
    XSetForeground(app->dpy, app->textGC, label.w.foreground);
    XSetBackground(app->dpy, app->textGC, label.w.background);
-   
    t = label.multiText;
    x = label.w.x;
    y = label.w.y + t->ascent;
    while (NULL != t) {
       if (t->text) {
-	 XDrawString(app->dpy, draw, app->textGC, x, y, t->text,
-		     t->textLength);
+         XftColor *color;
+         const char *clrname = "#ff0000";
+         if(!XftColorAllocName(app->dpy, DefaultVisualOfScreen(app->screen), DefaultColormapOfScreen(app->screen), clrname, color)) {
+            fprintf(stderr, "error, cannot allocate color '%s'", clrname);
+         };
+		     XftDraw *d = XftDrawCreate(app->dpy, draw, DefaultVisualOfScreen(app->screen), DefaultColormapOfScreen(app->screen));
+         XftDrawStringUtf8(d, color, label.font, x, y, (XftChar8 *) t->text, t->textLength);
+         if (d) {
+            XftDrawDestroy(d);
+         }
       }
       y += t->descent;
       t = t->next;
       if (t) {
-	 y += t->ascent;
+	       y += t->ascent;
       }
    }
 }
