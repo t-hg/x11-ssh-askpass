@@ -89,6 +89,7 @@ typedef struct
    XftFont *font;
    TextObject *multiText;
    WidgetInfo w;
+   char *color;
 } LabelInfo;
 
 typedef struct

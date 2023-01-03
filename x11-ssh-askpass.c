@@ -349,7 +349,7 @@ TextObject *createTextObject(AppInfo *app, char *s)
 }
 
 /* Assumes 'label' object exists and is zeroed. */
-void createLabel(AppInfo *app, char *text, LabelInfo *label)
+void createLabel(AppInfo *app, char *text, char *color, LabelInfo *label)
 {
    char *substring;
    TextObject *t;
@@ -358,6 +358,7 @@ void createLabel(AppInfo *app, char *text, LabelInfo *label)
       return;
    }
    label->fullText = strdup(text);
+   label->color = strdup(color);
    label->multiText = createTextObject(app, label->fullText);
    t = label->multiText;
    substring = strchr(label->fullText, '\n');
@@ -365,7 +366,7 @@ void createLabel(AppInfo *app, char *text, LabelInfo *label)
       *(substring++) = '\0';
       t->next = createTextObject(app, substring);
       if (t->next) {
-	 t = t->next;
+	       t = t->next;
       }
       substring = strchr(substring, '\n');
    }
@@ -375,6 +376,7 @@ void createDialog(AppInfo *app)
 {
    DialogInfo *d;
    char *labelText;
+   char *labelColor;
    
    if (app->dialog) {
       return;
@@ -440,11 +442,11 @@ void createDialog(AppInfo *app)
    if (2 == app->argc) {
       labelText = strdup(app->argv[1]);
    } else {
-      labelText =
-	 getStringResourceWithDefault("dialog.label", "Dialog.Label",
+      labelText = getStringResourceWithDefault("dialog.label", "Dialog.Label",
 				      "Please enter your authentication passphrase:");
    }
-   createLabel(app, labelText, &(d->label));
+   labelColor = getStringResourceWithDefault("dialog.foreground", "Dialog.Foreground", "#000000");
+   createLabel(app, labelText, labelColor, &(d->label));
    freeIf(labelText);
    d->label.font = getFontResource(app, "dialog.font", "Dialog.Font");
    calcLabelTextExtents(app, &(d->label));
@@ -476,9 +478,9 @@ void createDialog(AppInfo *app)
       get_integer_resource("okButton.horizontalSpacing", "Button.Spacing", 4));
    d->okButton.w3.verticalSpacing = scaleYDimension(app,
       get_integer_resource("okButton.verticalSpacing", "Button.Spacing", 2));
-   labelText =
-      getStringResourceWithDefault("okButton.label", "Button.Label", "OK");
-   createLabel(app, labelText, &(d->okButton.label));
+   labelText = getStringResourceWithDefault("okButton.label", "Button.Label", "OK");
+   labelColor = getStringResourceWithDefault("okButton.foreground", "Button.Foreground", "#000000");
+   createLabel(app, labelText, labelColor, &(d->okButton.label));
    freeIf(labelText);
    d->okButton.label.font =
       getFontResource(app, "okButton.font", "Button.Font");
@@ -515,10 +517,9 @@ void createDialog(AppInfo *app)
    d->cancelButton.w3.verticalSpacing = scaleYDimension(app,
       get_integer_resource("cancelButton.verticalSpacing", "Button.Spacing",
 			   2));
-   labelText =
-      getStringResourceWithDefault("cancelButton.label", "Button.Label",
-				   "Cancel");
-   createLabel(app, labelText, &(d->cancelButton.label));
+   labelText = getStringResourceWithDefault("cancelButton.label", "Button.Label", "Cancel");
+   labelColor = getStringResourceWithDefault("cancelButton.foreground", "Button.Foreground", "#000000");
+   createLabel(app, labelText, labelColor, &(d->cancelButton.label));
    freeIf(labelText);
    d->cancelButton.label.font =
       getFontResource(app, "cancelButton.font", "Button.Font");
@@ -719,6 +720,7 @@ void destroyLabel(AppInfo *app, LabelInfo *label)
    }
    freeIf(label->fullText);
    freeFontIf(app, label->font);
+   freeIf(label->color);
 }
 
 void destroyDialog(AppInfo *app)
@@ -888,9 +890,9 @@ void paintLabel(AppInfo *app, Drawable draw, LabelInfo label)
    while (NULL != t) {
       if (t->text) {
          XftColor *color;
-         const char *clrname = "#ff0000";
-         if(!XftColorAllocName(app->dpy, DefaultVisualOfScreen(app->screen), DefaultColormapOfScreen(app->screen), clrname, color)) {
-            fprintf(stderr, "error, cannot allocate color '%s'", clrname);
+         fprintf(stderr, "color: %s", label.color);
+         if(!XftColorAllocName(app->dpy, DefaultVisualOfScreen(app->screen), DefaultColormapOfScreen(app->screen), label.color, color)) {
+            fprintf(stderr, "error, cannot allocate color '%s'", label.color);
          };
 		     XftDraw *d = XftDrawCreate(app->dpy, draw, DefaultVisualOfScreen(app->screen), DefaultColormapOfScreen(app->screen));
          XftDrawStringUtf8(d, color, label.font, x, y, (XftChar8 *) t->text, t->textLength);
