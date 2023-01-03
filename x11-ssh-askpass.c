@@ -846,9 +846,6 @@ void createGCs(AppInfo *app)
    gcvMask |= GCForeground;
    gcv.background = d->label.w.background;
    gcvMask |= GCBackground;
-   //TODO
-   //gcv.font = d->label.font->fid;
-   //gcvMask |= GCFont;
    app->textGC = XCreateGC(app->dpy, app->rootWindow, gcvMask, &gcv);
    
    gcvMask = 0;
@@ -899,6 +896,9 @@ void paintLabel(AppInfo *app, Drawable draw, LabelInfo label)
          XftDrawStringUtf8(d, color, label.font, x, y, (XftChar8 *) t->text, t->textLength);
          if (d) {
             XftDrawDestroy(d);
+         }
+         if (color) {
+            XftColorFree(app->dpy, DefaultVisualOfScreen(app->screen), DefaultColormapOfScreen(app->screen), color);
          }
       }
       y += t->descent;
