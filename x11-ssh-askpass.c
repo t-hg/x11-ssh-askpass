@@ -890,7 +890,6 @@ void paintLabel(AppInfo *app, Drawable draw, LabelInfo label)
    while (NULL != t) {
       if (t->text) {
          XftColor *color;
-         fprintf(stderr, "color: %s", label.color);
          if(!XftColorAllocName(app->dpy, DefaultVisualOfScreen(app->screen), DefaultColormapOfScreen(app->screen), label.color, color)) {
             fprintf(stderr, "error, cannot allocate color '%s'", label.color);
          };
