@@ -94,7 +94,7 @@ void freeFontIf(AppInfo *app, XftFont *f)
 XftFont *getFontResource(AppInfo *app, char *instanceName, char *className)
 {
    char *fallbackFont = "monospace:size=12";
-   char *s = get_string_resource(instanceName, className);
+   char *s = getStringResourceWithDefault(instanceName, className, fallbackFont);
    XftFont *f = NULL;
    if (!(f = XftFontOpenName(app->dpy, DefaultScreen(app->dpy), s))) {
       fprintf(stderr, "error, cannot load font from name: '%s'\n", s);
