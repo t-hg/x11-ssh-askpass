@@ -1,7 +1,43 @@
-x11-ssh-askpass with Xft support.
+## x11-ssh-askpass with Xft support.
 
-Based on https://pkgs.fedoraproject.org/repo/pkgs/openssh/x11-ssh-askpass-1.2.4.1.tar.gz/8f2e41f3f7eaa8543a2440454637f3c3/x11-ssh-askpass-1.2.4.1.tar.gz, SHA256 '620de3c32ae72185a2c9aeaec03af24242b9621964e38eb625afb6cdb30b8c88'.
+### Example configuration for ssh and sudo
 
+```
+# ~/.bashrc
+
+if [ -n "$DISPLAY" ]; then
+  ASKPASS="/usr/local/bin/x11-ssh-askpass"
+  export SSH_ASKPASS="$ASKPASS"
+  export SSH_ASKPASS_REQUIRE="prefer"
+  export SUDO_ASKPASS="$ASKPASS"
+  alias sudo='sudo -A'
+fi
+```
+
+### Example theming
+
+```
+; ~/.Xresources
+
+x11-ssh-askpass*font: monospace:size=12
+x11-ssh-askpass*background: #222222
+x11-ssh-askpass*foreground: #ffffff
+x11-ssh-askpass*shadowThickness: 0
+x11-ssh-askpass*borderWidth: 1
+x11-ssh-askpass*Indicator*borderColor: #444444
+x11-ssh-askpass*Indicator*foreground: #285577
+x11-ssh-askpass*Indicator*minimumCount: 12
+x11-ssh-askpass*Indicator*width: 21
+x11-ssh-askpass*Indicator*height: 11
+x11-ssh-askpass*Button*borderColor: #444444
+```
+
+### Reference
+
+* https://pkgs.fedoraproject.org/repo/pkgs/openssh/x11-ssh-askpass-1.2.4.1.tar.gz/8f2e41f3f7eaa8543a2440454637f3c3/x11-ssh-askpass-1.2.4.1.tar.gz
+* SHA256 '620de3c32ae72185a2c9aeaec03af24242b9621964e38eb625afb6cdb30b8c88'.
+
+### Original README
 
 ```
 # README: Notes about X11-based passphrase dialog for OpenSSH
