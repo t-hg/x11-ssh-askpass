@@ -24,7 +24,7 @@ x11-ssh-askpass*background: #222222
 x11-ssh-askpass*foreground: #ffffff
 x11-ssh-askpass*shadowThickness: 0
 x11-ssh-askpass*borderWidth: 1
-x11-ssh-askpass*Indicator*borderColor: #444444
+x11-ssh-askpass*Indicator*borderColor: #4c7899
 x11-ssh-askpass*Indicator*foreground: #285577
 x11-ssh-askpass*Indicator*minimumCount: 12
 x11-ssh-askpass*Indicator*width: 21
