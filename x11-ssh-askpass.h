@@ -106,6 +106,7 @@ typedef struct
    int current;
    int minimumCount;
    int maximumCount;
+   Pixel borderColorWhenLit;
 } MasterIndicatorInfo;
 
 typedef struct

@@ -553,6 +553,9 @@ void createDialog(AppInfo *app)
    d->indicator.w3.borderColor =
       get_pixel_resource("indicator.borderColor", "Indicator.BorderColor",
 			 app->dpy, app->colormap, app->black);
+   d->indicator.borderColorWhenLit = 
+      get_pixel_resource("indicator.borderColorWhenLit", "Indicator.BorderColorWhenLit", 
+      app->dpy, app->colormap, d->indicator.w3.borderColor);
    d->indicator.w3.borderWidth =
       get_integer_resource("indicator.borderWidth", "Indicator.BorderWidth",
 			   0);
@@ -890,10 +893,10 @@ void paintLabel(AppInfo *app, Drawable draw, LabelInfo label)
    while (NULL != t) {
       if (t->text) {
          XftColor *color;
-         if(!XftColorAllocName(app->dpy, DefaultVisualOfScreen(app->screen), DefaultColormapOfScreen(app->screen), label.color, color)) {
+         if(!XftColorAllocName(app->dpy, DefaultVisualOfScreen(app->screen), app->colormap, label.color, color)) {
             fprintf(stderr, "error, cannot allocate color '%s'", label.color);
          };
-		     XftDraw *d = XftDrawCreate(app->dpy, draw, DefaultVisualOfScreen(app->screen), DefaultColormapOfScreen(app->screen));
+		     XftDraw *d = XftDrawCreate(app->dpy, draw, DefaultVisualOfScreen(app->screen), app->colormap);
          XftDrawStringUtf8(d, color, label.font, x, y, (XftChar8 *) t->text, t->textLength);
          if (d) {
             XftDrawDestroy(d);
@@ -989,10 +992,15 @@ void paintIndicator(AppInfo *app, Drawable draw, IndicatorElement indicator)
    GC gc = app->dimGC;
    
    if (indicator.parent->w3.borderWidth > 0) {
-      XSetForeground(app->dpy, app->borderGC,
-		     indicator.parent->w3.borderColor);
+      if (indicator.isLit) {
+        XSetForeground(app->dpy, app->borderGC,
+		       indicator.parent->borderColorWhenLit);
+      } else {
+        XSetForeground(app->dpy, app->borderGC,
+		       indicator.parent->w3.borderColor);
+      }
       XFillRectangle(app->dpy, draw, app->borderGC, indicator.w.x,
-		     indicator.w.y, indicator.w.width, indicator.w.height);
+		       indicator.w.y, indicator.w.width, indicator.w.height);
    }
    if (indicator.isLit) {
       gc = app->brightGC;
