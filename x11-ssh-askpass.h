@@ -1,12 +1,12 @@
 /* x11-ssh-askpass.h:  A generic X11-based password dialog for OpenSSH.
  * created 1999-Nov-17 03:40 Jim Knoble <jmknoble@pobox.com>
  * autodate: 2001-Sep-16 18:08
- * 
+ *
  * by Jim Knoble <jmknoble@pobox.com>
  * Copyright (C) 1999,2000,2001 Jim Knoble
- * 
+ *
  * Disclaimer:
- * 
+ *
  * The software is provided "as is", without warranty of any kind,
  * express or implied, including but not limited to the warranties of
  * merchantability, fitness for a particular purpose and
@@ -14,22 +14,22 @@
  * claim, damages or other liability, whether in an action of
  * contract, tort or otherwise, arising from, out of or in connection
  * with the software or the use or other dealings in the software.
- * 
+ *
  * Portions of this code are distantly derived from code in xscreensaver
  * by Jamie Zawinski <jwz@jwz.org>.  That code says:
- * 
+ *
  * --------8<------------------------------------------------8<--------
  * xscreensaver, Copyright (c) 1991-1999 Jamie Zawinski <jwz@jwz.org>
- * 
+ *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
  * the above copyright notice appear in all copies and that both that
  * copyright notice and this permission notice appear in supporting
  * documentation.  No representations are made about the suitability of this
- * software for any purpose.  It is provided "as is" without express or 
+ * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  * --------8<------------------------------------------------8<--------
- * 
+ *
  * The remainder of this code falls under the same permissions and
  * provisions as those of the xscreensaver code.
  */
@@ -37,169 +37,160 @@
 #ifndef H_X11_SSH_ASKPASS
 #define H_X11_SSH_ASKPASS
 
-#include <X11/Xlib.h>
 #include <X11/Intrinsic.h>
 #include <X11/Shell.h>
 #include <X11/Xft/Xft.h>
+#include <X11/Xlib.h>
 
-#define EXIT_STATUS_ACCEPT	0
-#define EXIT_STATUS_CANCEL	1
-#define EXIT_STATUS_NO_MEMORY	2
-#define EXIT_STATUS_ERROR	3
-#define EXIT_STATUS_TIMEOUT	4
-#define EXIT_STATUS_ANOMALY	127
+#define EXIT_STATUS_ACCEPT 0
+#define EXIT_STATUS_CANCEL 1
+#define EXIT_STATUS_NO_MEMORY 2
+#define EXIT_STATUS_ERROR 3
+#define EXIT_STATUS_TIMEOUT 4
+#define EXIT_STATUS_ANOMALY 127
 
-typedef struct
-{
-   Pixel foreground;
-   Pixel background;
-   Dimension width;
-   Dimension height;
-   Position x;
-   Position y;
+typedef struct {
+  Pixel foreground;
+  Pixel background;
+  Dimension width;
+  Dimension height;
+  Position x;
+  Position y;
 } WidgetInfo;
 
-typedef struct
-{
-   WidgetInfo w;
-   Pixel topShadowColor;
-   Pixel bottomShadowColor;
-   Dimension shadowThickness;
-   Pixel borderColor;
-   Dimension borderWidth;
-   Dimension interiorWidth;
-   Dimension interiorHeight;
-   Dimension horizontalSpacing;
-   Dimension verticalSpacing;
+typedef struct {
+  WidgetInfo w;
+  Pixel topShadowColor;
+  Pixel bottomShadowColor;
+  Dimension shadowThickness;
+  Pixel borderColor;
+  Dimension borderWidth;
+  Dimension interiorWidth;
+  Dimension interiorHeight;
+  Dimension horizontalSpacing;
+  Dimension verticalSpacing;
 } Widget3dInfo;
 
-typedef struct TextObjectStruct
-{
-   char *text;
-   int textLength;
-   int ascent;
-   int descent;
-   int width;
-   struct TextObjectStruct *next;
+typedef struct TextObjectStruct {
+  char *text;
+  int textLength;
+  int ascent;
+  int descent;
+  int width;
+  struct TextObjectStruct *next;
 } TextObject;
 
-typedef struct
-{
-   char *fullText;
-   XftFont *font;
-   TextObject *multiText;
-   WidgetInfo w;
-   char *color;
+typedef struct {
+  char *fullText;
+  XftFont *font;
+  TextObject *multiText;
+  WidgetInfo w;
+  char *color;
 } LabelInfo;
 
-typedef struct
-{
-   Widget3dInfo w3;
-   LabelInfo label;
-   Bool pressed;
+typedef struct {
+  Widget3dInfo w3;
+  LabelInfo label;
+  Bool pressed;
 } ButtonInfo;
 
-typedef struct
-{
-   Widget3dInfo w3;
-   int count;
-   int current;
-   int minimumCount;
-   int maximumCount;
-   Pixel borderColorWhenLit;
+typedef struct {
+  Widget3dInfo w3;
+  int count;
+  int current;
+  int minimumCount;
+  int maximumCount;
+  Pixel borderColorWhenLit;
 } MasterIndicatorInfo;
 
-typedef struct
-{
-   MasterIndicatorInfo *parent;
-   WidgetInfo w;
-   Bool isLit;
+typedef struct {
+  MasterIndicatorInfo *parent;
+  WidgetInfo w;
+  Bool isLit;
 } IndicatorElement;
 
-typedef struct
-{
-   Window dialogWindow;
-   
-   XSizeHints *sizeHints;
-   XWMHints *wmHints;
-   XClassHint *classHints;
-   XTextProperty windowName;
-   
-   char *title;
-   Widget3dInfo w3;
-   
-   LabelInfo label;
+typedef struct {
+  Window dialogWindow;
 
-   MasterIndicatorInfo indicator;
-   IndicatorElement *indicators;
-   
-   ButtonInfo okButton;
-   ButtonInfo cancelButton;
-   
-   int pressedButton;
+  XSizeHints *sizeHints;
+  XWMHints *wmHints;
+  XClassHint *classHints;
+  XTextProperty windowName;
+
+  char *title;
+  Widget3dInfo w3;
+
+  LabelInfo label;
+
+  MasterIndicatorInfo indicator;
+  IndicatorElement *indicators;
+
+  ButtonInfo okButton;
+  ButtonInfo cancelButton;
+
+  int pressedButton;
 } DialogInfo;
 
-#define NO_BUTTON	0
-#define OK_BUTTON	1
-#define CANCEL_BUTTON	2
+#define NO_BUTTON 0
+#define OK_BUTTON 1
+#define CANCEL_BUTTON 2
 
-typedef struct 
-{
-   char *appName;
-   char *appClass;
-   
-   int argc;
-   char **argv;
-   
-   pid_t pid;
-   
-   char *buf;
-   int bufSize;
-   int bufIndex;
+typedef struct {
+  char *appName;
+  char *appClass;
 
-   Display *dpy;
-   Screen *screen;
-   Window rootWindow;
-   Pixel black;
-   Pixel white;
-   Colormap colormap;
+  int argc;
+  char **argv;
 
-   /* Resolution measurements are normalized to dots/meter. */
-   long xResolution;
-   long yResolution;
-   long defaultXResolution;
-   long defaultYResolution;
-   long xFuzz;
-   long yFuzz;
-   
-   XtAppContext appContext;
-   Widget toplevelShell;
-   XrmDatabase resourceDb;
-   
-   Atom wmDeleteWindowAtom;
-   
-   GC fillGC;
-   GC borderGC;
-   GC textGC;
-   GC brightGC;
-   GC dimGC;
-   
-   long eventMask;
-   
-   Bool grabKeyboard;
-   Bool grabPointer;
-   Bool grabServer;
-   Bool isKeyboardGrabbed;
-   Bool isPointerGrabbed;
-   Bool isServerGrabbed;
-   unsigned int grabFailTimeout;
-   unsigned int grabRetryInterval;
-   
-   unsigned long inputTimeout;
-   XtIntervalId inputTimeoutTimerId;
-   Bool inputTimeoutActive;
-   
-   DialogInfo *dialog;
+  pid_t pid;
+
+  char *buf;
+  int bufSize;
+  int bufIndex;
+
+  Display *dpy;
+  Screen *screen;
+  Window rootWindow;
+  Pixel black;
+  Pixel white;
+  Colormap colormap;
+
+  /* Resolution measurements are normalized to dots/meter. */
+  long xResolution;
+  long yResolution;
+  long defaultXResolution;
+  long defaultYResolution;
+  long xFuzz;
+  long yFuzz;
+
+  XtAppContext appContext;
+  Widget toplevelShell;
+  XrmDatabase resourceDb;
+
+  Atom wmDeleteWindowAtom;
+
+  GC fillGC;
+  GC borderGC;
+  GC textGC;
+  GC brightGC;
+  GC dimGC;
+
+  long eventMask;
+
+  Bool grabKeyboard;
+  Bool grabPointer;
+  Bool grabServer;
+  Bool isKeyboardGrabbed;
+  Bool isPointerGrabbed;
+  Bool isServerGrabbed;
+  unsigned int grabFailTimeout;
+  unsigned int grabRetryInterval;
+
+  unsigned long inputTimeout;
+  XtIntervalId inputTimeoutTimerId;
+  Bool inputTimeoutActive;
+
+  DialogInfo *dialog;
 } AppInfo;
 
 void outOfMemory(AppInfo *app, int line);
@@ -208,12 +199,12 @@ void freeFontIf(AppInfo *app, XftFont *f);
 
 XftFont *getFontResource(AppInfo *app, char *instanceName, char *className);
 char *getStringResourceWithDefault(char *instanceName, char *className,
-				   char *defaultText);
+                                   char *defaultText);
 unsigned int getUnsignedIntegerResource(AppInfo *app, char *instanceName,
-					char *className,
-					unsigned int defaultValue);
+                                        char *className,
+                                        unsigned int defaultValue);
 long getResolutionResource(AppInfo *app, char *instanceName, char *className,
-			   char *defaultResolutionSpec);
+                           char *defaultResolutionSpec);
 
 void calcLabelTextExtents(AppInfo *app, LabelInfo *label);
 void calcTotalButtonExtents(ButtonInfo *button);
@@ -237,10 +228,10 @@ void updateIndicatorElement(AppInfo *app, int i);
 void updateIndicators(AppInfo *app, int condition);
 void paintDialog(AppInfo *app);
 
-#define GRAB_KEYBOARD	0
-#define GRAB_POINTER	1
+#define GRAB_KEYBOARD 0
+#define GRAB_POINTER 1
 void performGrab(AppInfo *app, int grabType, char *grabTypeName,
-		 Bool shouldGrab, Bool *isGrabbed);
+                 Bool shouldGrab, Bool *isGrabbed);
 
 void grabKeyboard(AppInfo *app);
 void ungrabKeyboard(AppInfo *app);

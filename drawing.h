@@ -5,7 +5,7 @@
  * the above copyright notice appear in all copies and that both that
  * copyright notice and this permission notice appear in supporting
  * documentation.  No representations are made about the suitability of this
- * software for any purpose.  It is provided "as is" without express or 
+ * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  */
 
@@ -20,12 +20,8 @@
 
 #include <X11/Intrinsic.h>
 
-void
-draw_shaded_rectangle (Display *dpy, Window window,
-		       int x, int y,
-		       int width, int height,
-		       int thickness,
-		       unsigned long top_color,
-		       unsigned long bottom_color);
+void draw_shaded_rectangle(Display *dpy, Window window, int x, int y, int width,
+                           int height, int thickness, unsigned long top_color,
+                           unsigned long bottom_color);
 
 #endif /* _DRAWING_H_ */
